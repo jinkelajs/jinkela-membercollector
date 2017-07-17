@@ -1,0 +1,20 @@
+{
+  "name": "jinkela-membercollector",
+  "version": "1.0.0",
+  "description": "Member Collector",
+  "main": "index.js",
+  "author": "YanagiEiichi (admin@web-tinker.com)",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint . --fix",
+    "test": "ui-tester-start tests"
+  },
+  "devDependencies": {
+    "eslint": "^4.2.0",
+    "eslint-config-elemefe": "^0.3.0",
+    "ui-tester": "^1.1.4"
+  },
+  "dependencies": {
+    "element-ui": "^2.2.1"
+  }
+}

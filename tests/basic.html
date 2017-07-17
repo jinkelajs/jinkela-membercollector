@@ -1,0 +1,109 @@
+<meta charset="utf-8" />
+<script src="https://unpkg.com/jinkela@1.3.3/umd.js"></script>
+<script src="/tester.js"></script>
+<script src="/index.js"></script>
+<body>
+<script>
+var data = [
+  { id: 1, name: 'Sales Department' },
+  { id: 2, name: 'Product Development Department' },
+  { id: 100, parentId: 1, name: 'Group A' },
+  { id: 101, parentId: 1, name: 'Group B' },
+  { id: 200, parentId: 2, name: 'Group C' },
+  { id: 201, parentId: 2, name: 'Group D' },
+  { id: 1000, parentId: 100, name: 'Group X' }
+];
+let index = 0;
+for (let i of data) {
+  i.members = [];
+  for (let j = 0; j < 5; j++) {
+    let id = ++index;
+    let name = `Member ${index}`;
+    i.members.push({ id, name });
+  }
+}
+
+
+(async () => {
+  /**
+   * Unfold Department
+  **/
+
+  let mc = new MemberCollector({ data }).to(document.body);
+  Tester.assert(JSON.stringify(mc.value) === '[]', 'mc.value must be an empty array');
+
+  let firstDepartment = mc.element.querySelector('[jinkela-class^=Option]');
+  Tester.assert(firstDepartment, 'first department must exist');
+
+  let firstDepartmentList = firstDepartment.nextElementSibling;
+  Tester.assert(firstDepartmentList, 'first department list must exist');
+  Tester.assert(firstDepartmentList.children.length === 0, 'children must be empty now');
+
+  firstDepartment.click(); // unfold
+  Tester.assert(firstDepartmentList.children.length > 0, 'children must be not empty now');
+
+  let firstNestedDepartment = firstDepartmentList.querySelector('[jinkela-class^=Option]');
+  Tester.assert(firstNestedDepartment, 'first nested department must exist');
+
+  let firstNestedDepartmentList = firstNestedDepartment.nextElementSibling;
+  Tester.assert(firstNestedDepartmentList, 'first department list must exist');
+  Tester.assert(firstNestedDepartmentList.children.length === 0, 'children must be empty now');
+
+  firstNestedDepartment.click(); // unfold
+  Tester.assert(firstNestedDepartmentList.children.length > 0, 'children must be not empty now');
+
+
+  /**
+   * Select a Member
+  **/
+
+  let firstMember = mc.element.querySelector('[jinkela-class^=Member]');
+  Tester.assert(firstMember, 'first member must exist');
+
+  let firstMemberCheckbox = firstMember.querySelector('[jinkela-class^=Checkbox]');
+  Tester.assert(!firstMemberCheckbox.classList.contains('checked'), 'first member must be not checked yet');
+
+  firstMember.click(); // select
+  Tester.assert(firstMemberCheckbox.classList.contains('checked'), 'first member must be checked now');
+  Tester.assert(mc.value.length === 1, 'length of mc.value must be 1');
+
+  mc.value = []; // clear value
+  Tester.assert(!firstMemberCheckbox.classList.contains('checked'), 'first member must be not checked');
+
+
+  /**
+   * Select a Department
+  **/
+
+  let firstDepartmentCheckbox = firstDepartment.querySelector('[jinkela-class^=Checkbox]');
+  Tester.assert(firstDepartmentCheckbox, 'first department checkbox must exist');
+
+  firstDepartmentCheckbox.click(); // select whole department
+  Tester.assert(mc.value.length > 1, 'length of mc.value must greate then 1');
+
+
+  /**
+   * Search
+  **/
+
+  Tester.assert(mc.element.querySelectorAll('.filtered').length === 0, 'no filtered option');
+
+  let input = mc.element.querySelector('input');
+  Tester.assert(input, 'input must exist');
+  input.value = 'Member 5';
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  await new Promise(resolve => setTimeout(resolve, 1000)); // wait 1 second
+
+  Tester.assert(mc.element.querySelectorAll('.filtered').length > 1, 'many filterd options');
+
+  input.value = ''; // clear search
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  await new Promise(resolve => setTimeout(resolve, 1000)); // wait 1 second
+
+  Tester.assert(mc.element.querySelectorAll('.filtered').length === 0, 'no filtered option');
+
+
+  Tester.feedback(true);
+
+})();
+</script>

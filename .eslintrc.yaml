@@ -1,0 +1,8 @@
+---
+  env:
+    es6: true
+  globals:
+    Jinkela: true
+    hljs: true
+    DemoBase: true
+  extends: elemefe

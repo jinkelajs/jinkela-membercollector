@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="jinkela" content="auto=true" />
+  <script src="//cdn.jsdelivr.net/npm/jinkela@1.3.3/umd.js"></script>
+  <title>Member Collector</title>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/styles/color-brewer.min.css" />
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/highlight.min.js"></script>
+  <script src="example.js"></script>
+  <script src="../index.js"></script>
+  <script>
+  var data = [
+    { id: 1, name: 'Sales Department' },
+    { id: 2, name: 'Product Development Department' },
+    { id: 100, parentId: 1, name: 'Group A' },
+    { id: 101, parentId: 1, name: 'Group B' },
+    { id: 200, parentId: 2, name: 'Group C' },
+    { id: 201, parentId: 2, name: 'Group D' },
+    { id: 1000, parentId: 100, name: 'Group X' }
+  ];
+  let index = 0;
+  for (let i of data) {
+    i.members = [];
+    for (let j = 0; j < 5; j++) {
+      let id = ++index;
+      let name = `Member ${index}`;
+      i.members.push({ id, name });
+    }
+  }
+  </script>
+</head>
+<body>
+  <div demo="Basic Usage">
+    <jkl-member-collector data="{data}"></jkl-member-collector>
+  </div>
+  <div demo="Default Value">
+    <script>
+      var defaultValue = [ 1, 2, 5, 17 ];
+    </script>
+    <jkl-member-collector data="{data}" value="{defaultValue}"></jkl-member-collector>
+  </div>
+  <div demo="Disabled">
+    <jkl-member-collector data="{data}" value="{defaultValue}" disabled="true"></jkl-member-collector>
+  </div>
+  <div demo="I18N">
+    <jkl-member-collector
+      data="{data}"
+      checked-only-text="只看选中"
+      flatten-text="列表模式"
+      empty-text="无匹配数据"
+      placeholder="搜索"
+    ></jkl-member-collector>
+  </div>
+</body>
+</html>
