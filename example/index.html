@@ -52,5 +52,33 @@
       placeholder="搜索"
     ></jkl-member-collector>
   </div>
+  <div demo="Extension">
+    <script>
+    var Extension = class extends Jinkela {
+      get tagName() { return 'input'; }
+      get styleSheet() {
+        return `
+          :scope {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            line-height: 20px;
+            margin-left: 10px;
+            width: 100px;
+            padding: 0 5px;
+            box-sizing: border-box;
+          }
+        `;
+      }
+      get value() { return this.element.value; }
+      set value(value) { this.element.value = value; }
+      get disabled() { return this.element.disabled; }
+      set disabled(value) { this.element.disabled = value; }
+    }
+    </script>
+    <jkl-member-collector
+      data="{data}"
+      extension="{Extension}"
+    ></jkl-member-collector>
+  </div>
 </body>
 </html>

@@ -148,7 +148,6 @@
           height: 34px;
           line-height: 34px;
           box-sizing: border-box;
-          cursor: pointer;
           &:hover {
             background: #f5f7fa;
           }
@@ -168,6 +167,8 @@
     get count() { return 1; }
     get selectedNum() { return this.checked; }
 
+    get value() { return [ this.id, this.extensionObject && this.extensionObject.value ]; }
+
     applyConditions(test) {
       if (test(this)) {
         this.element.classList.remove('filtered');
@@ -178,23 +179,48 @@
       }
     }
 
+    init() {
+      this.native.addEventListener('click', this.select.bind(this));
+      let { extension: Extension, disabled } = this;
+      if (typeof Extension === 'function') {
+        this.extensionObject = new Extension({ disabled });
+        this.extensionObject.element.addEventListener('change', () => {
+          if (!this.checked) return;
+          let detail = this.value;
+          let myEvent = new CustomEvent('update', { bubbles: true, detail });
+          this.element.dispatchEvent(myEvent);
+        });
+      }
+    }
+
     update(value) {
-      if (value) this.checked = value.includes(this.id);
+      if (value) this.checked = value.has(this.id);
+      if (this.extensionObject) {
+        if (this.checked) {
+          this.extensionObject.to(this);
+          this.extensionObject.value = value.get(this.id);
+        } else {
+          this.extensionObject.element.remove();
+        }
+      }
     }
 
     select(event) {
       if (this.disabled) return;
       event.fromCheckbox = true;
-      let detail = [ this.id ];
-      this.element.dispatchEvent(new CustomEvent(this.checked ? 'remove' : 'add', { bubbles: true, detail }));
+      let detail = [ this.value ];
+      let myEvent = new CustomEvent(this.checked ? 'remove' : 'add', { bubbles: true, detail });
+      this.element.dispatchEvent(myEvent);
     }
 
     get template() {
       return `
-        <div on-click="{select}">
-          <jkl-triangle></jkl-triangle>
-          <jkl-checkbox ref="checkbox" checked="{checked}" disabled="{disabled}"></jkl-checkbox>
-          <span>{name}</span>
+        <div>
+          <span class="native" ref="native">
+            <jkl-triangle></jkl-triangle>
+            <jkl-checkbox ref="checkbox" checked="{checked}" disabled="{disabled}"></jkl-checkbox>
+            <span>{name}</span>
+          </span>
         </div>
       `;
     }
@@ -202,7 +228,16 @@
     get styleSheet() {
       return `
         :scope {
-          > .triangle { visibility: hidden; }
+          > .native {
+            cursor: pointer;
+            display: inline-block;
+            vertical-align: middle;
+            > .triangle { visibility: hidden; }
+            > span {
+              display: inline-block;
+              vertical-align: middle;
+            }
+          }
           &.filtered { display: none; }
         }
       `;
@@ -240,9 +275,10 @@
       event.fromCheckbox = true;
       let detail = (function callee(what) {
         if (what.$subList) return [].concat(...what.$subList.map(callee));
-        return what.id;
+        return [ what.value ];
       }(this));
-      this.element.dispatchEvent(new CustomEvent(this.checked ? 'remove' : 'add', { bubbles: true, detail }));
+      let myEvent = new CustomEvent(this.checked ? 'remove' : 'add', { bubbles: true, detail });
+      this.element.dispatchEvent(myEvent);
     }
 
     preventDoubleClickSelect() {
@@ -272,9 +308,9 @@
 
     get $subList() {
       let value = [];
-      let { members = [], disabled } = this;
+      let { members = [], disabled, extension } = this;
       members.forEach(raw => {
-        value.push(new Member(raw, { disabled }));
+        value.push(new Member(raw, { disabled, extension }));
       });
       this.departments.forEach(item => {
         value.push(new Department(item, { indent: this.indent + 20 }));
@@ -310,7 +346,7 @@
     get template() {
       return `
         <div>
-          <jkl-option on-click="{toggle}">
+          <jkl-option on-click="{toggle}" class="native">
             <jkl-triangle value="{active}" false="90deg" true="180deg"></jkl-triangle>
             <jkl-checkbox
               ref="checkbox" checked="{checked}" touched="{touched}"
@@ -328,6 +364,9 @@
     get styleSheet() {
       return `
         :scope {
+          > .native {
+            cursor: pointer;
+          }
           var {
             color: #909399;
             font-style: normal;
@@ -371,12 +410,12 @@
     }
 
     init() {
-      let { data, disabled } = this;
+      let { data, disabled, extension } = this;
       if (!(data instanceof Array)) throw new Error('MemberCollector: `data` must be an array');
 
       // Wrap Object
       data = data.map(({ id, parentId, name, members }) => {
-        return { id, parentId, members, name, departments: [], disabled };
+        return { id, parentId, members, name, departments: [], disabled, extension };
       });
 
       // Build Tree
@@ -521,9 +560,10 @@
 
   class MemberCollector extends Jinkela {
     // Compatible with Jinkela 1.2.*
-    beforeParse({ data, disabled }) {
+    beforeParse({ data, disabled, extension }) {
       this.data = data;
       this.disabled = disabled;
+      this.extension = extension;
     }
 
     get Input() { return Input; }
@@ -547,6 +587,7 @@
       this.element.addEventListener('filter', this.filterHandler.bind(this));
       this.element.addEventListener('add', this.addHandler.bind(this));
       this.element.addEventListener('remove', this.removeHandler.bind(this));
+      this.element.addEventListener('update', this.updateHandler.bind(this));
       Object.defineProperty(this, '$hasInit', { value: true, configurable: true });
       this.update();
       if (this.disabled) this.checkedOnlyControl.click();
@@ -569,15 +610,20 @@
       event.stopPropagation();
     }
 
+    updateHandler(event) {
+      this.$value.set(...event.detail);
+      event.stopPropagation();
+    }
+
     addHandler(event) {
-      this.value = [ ...new Set(this.value.concat(event.detail)) ];
+      this.value = new Map([ ...this.$value || [], ...event.detail ]);
       event.stopPropagation();
     }
 
     removeHandler(event) {
-      let set = new Set(this.value);
-      event.detail.forEach(item => set.delete(item));
-      this.value = [ ...set ];
+      let map = new Map([ ...this.$value || [] ]);
+      event.detail.forEach(item => map.delete(item[0]));
+      this.value = map;
       event.stopPropagation();
     }
 
@@ -589,15 +635,50 @@
       });
     }
 
-    get value() { return this.$value || []; }
+    get value() {
+      let map = this.$value || new Map();
+      if (this.extension) {
+        // Convert js map to json map
+        let result = {};
+        map.forEach((value, key) => {
+          result[JSON.stringify(key)] = value;
+        });
+        return result;
+      } else {
+        return [ ...map.keys() ];
+      }
+    }
     set value(value) {
+      switch (true) {
+        case value instanceof Map:
+          break;
+        case value instanceof Set:
+          value = Array.from(value);
+        case value instanceof Array: // eslint-disable-line no-fallthrough
+          // Convert to js map depend on this.extension
+          if (this.extension) {
+            value = new Map(value);
+          } else {
+            value = new Map(value.map(key => [ key, void 0 ]));
+          }
+          break;
+        case value instanceof Object:
+          // Convert json map to js map
+          value = Object.keys(value).reduce((base, key) => {
+            base.set(key, value[key]);
+            return base;
+          }, new Map());
+          break;
+        default:
+          value = new Map();
+      }
       Object.defineProperty(this, '$value', { configurable: true, value });
       this.update();
     }
 
     update() {
       if (!this.$hasInit) return;
-      this.tree.update(this.value);
+      this.tree.update(this.$value || new Map());
     }
 
     get template() {
@@ -608,7 +689,7 @@
             <jkl-control ref="checkedOnlyControl" key="checkedonly">{checkedOnlyText}</jkl-control>
             <jkl-control key="flatten">{flattenText}</jkl-control>
           </div>
-          <jkl-tree ref="tree" data="{data}" disabled="{disabled}"></jkl-tree>
+          <jkl-tree ref="tree" data="{data}" extension="{extension}" disabled="{disabled}"></jkl-tree>
         </div>
       `;
     }
