@@ -5,4 +5,5 @@
     Jinkela: true
     hljs: true
     DemoBase: true
+    define: true
   extends: elemefe
