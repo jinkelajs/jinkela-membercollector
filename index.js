@@ -9,7 +9,6 @@
       value = !!value;
       if (value === this.checked) return;
       this.element.classList[value ? 'add' : 'remove']('checked');
-      this.element.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     get touched() { return this.element.classList.contains('touched'); }
@@ -17,7 +16,6 @@
       value = !!value;
       if (value === this.touched) return;
       this.element.classList[value ? 'add' : 'remove']('touched');
-      this.element.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     get styleSheet() {
@@ -211,6 +209,7 @@
       let detail = [ this.value ];
       let myEvent = new CustomEvent(this.checked ? 'remove' : 'add', { bubbles: true, detail });
       this.element.dispatchEvent(myEvent);
+      this.element.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     get template() {
@@ -279,6 +278,7 @@
       }(this));
       let myEvent = new CustomEvent(this.checked ? 'remove' : 'add', { bubbles: true, detail });
       this.element.dispatchEvent(myEvent);
+      this.element.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     preventDoubleClickSelect() {
@@ -664,7 +664,7 @@
         case value instanceof Object:
           // Convert json map to js map
           value = Object.keys(value).reduce((base, key) => {
-            base.set(key, value[key]);
+            base.set(JSON.parse(key), value[key]);
             return base;
           }, new Map());
           break;

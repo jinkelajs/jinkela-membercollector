@@ -1,0 +1,90 @@
+<meta charset="utf-8" />
+<script src="https://unpkg.com/jinkela@1.2.22/umd.js"></script>
+<script src="/tester.js"></script>
+<script src="/index.js"></script>
+<body>
+<script>
+var data = [
+  { id: 1, name: 'Sales Department' },
+  { id: 2, name: 'Product Development Department' },
+  { id: 100, parentId: 1, name: 'Group A' },
+  { id: 101, parentId: 1, name: 'Group B' },
+  { id: 200, parentId: 2, name: 'Group C' },
+  { id: 201, parentId: 2, name: 'Group D' },
+  { id: 1000, parentId: 100, name: 'Group X' }
+];
+let index = 0;
+for (let i of data) {
+  i.members = [];
+  for (let j = 0; j < 5; j++) {
+    let id = ++index;
+    let name = `Member ${index}`;
+    i.members.push({ id, name });
+  }
+}
+
+class Extension extends Jinkela {
+  get tagName() { return 'input'; }
+  get styleSheet() {
+    return `
+      :scope {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        line-height: 20px;
+        margin-left: 10px;
+        width: 100px;
+        padding: 0 5px;
+        box-sizing: border-box;
+      }
+    `;
+  }
+  get value() { return this.element.value; }
+  set value(value) { this.element.value = value; }
+  get disabled() { return this.element.disabled; }
+  set disabled(value) { this.element.disabled = value; }
+}
+
+var findByText = (text) => {
+  return [ ...document.querySelectorAll('span') ].find(({ textContent }) => textContent === text);
+};
+
+
+(async () => {
+
+  let q = [];
+
+  let mc = new MemberCollector({ data, extension: Extension }).to(document.body);
+  mc.element.addEventListener('change', q.push.bind(q));
+
+  let firstDepartment = findByText('Sales Department');
+  firstDepartment.parentNode.click(); // unfold
+
+  Tester.assert(q.length === 0, `q.lenght must 0, but ${q.length}`);
+
+  let m1 = findByText('Member 1').parentNode;
+
+  m1.click();
+  Tester.assert(q.length === 1, `q.lenght must 1, but ${q.length}`);
+
+  m1.click();
+  Tester.assert(q.length === 2, `q.lenght must 2, but ${q.length}`);
+
+  firstDepartment.previousElementSibling.click();
+  Tester.assert(q.length === 3, `q.lenght must 3, but ${q.length}`);
+
+  firstDepartment.previousElementSibling.click();
+  Tester.assert(q.length === 4, `q.lenght must 4, but ${q.length}`);
+
+  mc.value = { '1': 'hehe' };
+  Tester.assert(q.length === 4, `q.lenght must 4, but ${q.length}`);
+
+  m1.nextElementSibling.value = 'hoho';
+  m1.nextElementSibling.dispatchEvent(new Event('change', { bubbles: true }));
+  Tester.assert(JSON.stringify(mc.value) === '{"1":"hoho"}', 'mc.value must be {"1":"hoho"}');
+  Tester.assert(q.length === 5, `q.lenght must 5, but ${q.length}`);
+
+
+  Tester.feedback(true);
+
+})();
+</script>
