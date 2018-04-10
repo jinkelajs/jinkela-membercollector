@@ -1,6 +1,5 @@
 type DepartmentMember = {
   id: number,
-  directorId: number,
   name: string,
 }
 
