@@ -436,7 +436,7 @@ define(() => {
           box-sizing: border-box;
           min-width: 240px;
           padding: 15px 0;
-          max-height: 300px;
+          max-height: var(--max-height);
           overflow: auto;
           &.empty::before {
             content: var(--empty-text);
@@ -574,11 +574,13 @@ define(() => {
     get placeholder() { return 'Search'; }
     get checkedOnlyText() { return 'Checked Only'; }
     get flattenText() { return 'Flatten'; }
+    set maxHeight(value) { this.element.style.setProperty('--max-height', value); }
     set ['checked-only-text'](value) { this.checkedOnlyText = value; }
     get ['checked-only-text']() { return this.checkedOnlyText; }
     set ['flatten-text'](value) { this.flattenText = value; }
     get ['flatten-text']() { return this.flattenText; }
     set ['empty-text'](value) { this.element.style.setProperty('--empty-text', JSON.stringify(value)); }
+    set ['max-height'](value) { this.element.style.setProperty('--max-height', JSON.stringify(value)); }
 
     init() {
       this.element.addEventListener('checkedonly', this.checkedOnlyHandler.bind(this));
@@ -697,6 +699,7 @@ define(() => {
       return `
         :scope {
           --empty-text: 'Empty';
+          --max-height: 300px;
           -webkit-font-smoothing: antialiased;
           box-sizing: border-box;
           margin-right: 1em;
