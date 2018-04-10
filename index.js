@@ -1,4 +1,4 @@
-{
+define(() => {
 
   class Checkbox extends Jinkela {
     set disabled(value) { this.element.classList[value ? 'add' : 'remove']('disabled'); }
@@ -727,6 +727,6 @@
     }
   }
 
-  window.MemberCollector = MemberCollector;
+  return MemberCollector;
 
-}
+});

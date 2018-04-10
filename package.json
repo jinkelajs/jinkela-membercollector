@@ -1,20 +1,19 @@
 {
   "name": "jinkela-membercollector",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Member Collector",
-  "main": "index.js",
+  "main": "umd.js",
   "author": "YanagiEiichi (admin@web-tinker.com)",
   "license": "MIT",
   "scripts": {
     "lint": "eslint . --fix",
-    "test": "ui-tester-start tests"
+    "test": "npm run prepublish && ui-tester-start tests",
+    "prepublish": "amd2umd index.js -n MemberCollector > umd.js"
   },
   "devDependencies": {
     "eslint": "^4.2.0",
     "eslint-config-elemefe": "^0.3.0",
+    "amd2umd": "0.0.6",
     "ui-tester": "^1.1.4"
-  },
-  "dependencies": {
-    "element-ui": "^2.2.1"
   }
 }
