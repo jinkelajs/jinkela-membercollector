@@ -296,7 +296,6 @@
       value = !!value;
       if (value === this.flatten) return;
       this.element.classList[value ? 'add' : 'remove']('flatten');
-      this.update();
       this.$subList.forEach(item => { item.flatten = value; });
     }
 

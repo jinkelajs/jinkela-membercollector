@@ -23,6 +23,10 @@ for (let i of data) {
   }
 }
 
+var findByText = (text) => {
+  return [ ...document.querySelectorAll('span') ].find(({ textContent }) => textContent === text);
+};
+
 
 (async () => {
   /**
@@ -101,6 +105,25 @@ for (let i of data) {
   await new Promise(resolve => setTimeout(resolve, 1000)); // wait 1 second
 
   Tester.assert(mc.element.querySelectorAll('.filtered').length === 0, 'no filtered option');
+
+
+  /**
+   * Flatten
+  **/
+
+  let m1 = findByText('Member 1').parentNode;
+  let m11 = findByText('Member 11').parentNode;
+
+  Tester.assert(m1.getBoundingClientRect().left < m11.getBoundingClientRect().left, 'lom1 must less then lom11');
+
+  let flatten = findByText('Flatten').parentNode;
+  flatten.click();
+
+  Tester.assert(m1.getBoundingClientRect().left == m11.getBoundingClientRect().left, 'lom1 must be lom11');
+
+  flatten.click();
+
+  Tester.assert(m1.getBoundingClientRect().left < m11.getBoundingClientRect().left, 'lom1 must less then lom11');
 
 
   Tester.feedback(true);
