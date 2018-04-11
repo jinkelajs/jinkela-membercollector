@@ -177,28 +177,40 @@ define(() => {
       }
     }
 
-    init() {
-      this.native.addEventListener('click', this.select.bind(this));
+    get extensionObject() {
       let { extension: Extension, disabled } = this;
+      let value;
       if (typeof Extension === 'function') {
-        this.extensionObject = new Extension({ disabled });
-        this.extensionObject.element.addEventListener('change', () => {
+        value = new Extension({ disabled });
+        value.element.addEventListener('change', () => {
           if (!this.checked) return;
           let detail = this.value;
           let myEvent = new CustomEvent('update', { bubbles: true, detail });
           this.element.dispatchEvent(myEvent);
         });
       }
+      Object.defineProperty(this, 'extensionObject', { configurable: true, value });
+      return value;
+    }
+
+    init() {
+      this.native.addEventListener('click', this.select.bind(this));
     }
 
     update(value) {
+      let checked = !!this.checked;
       if (value) this.checked = value.has(this.id);
-      if (this.extensionObject) {
+      if (this.checked !== checked) {
         if (this.checked) {
-          this.extensionObject.to(this);
-          this.extensionObject.value = value.get(this.id);
+          if (this.extensionObject) {
+            this.extensionObject.to(this);
+            if (value) this.extensionObject.value = value.get(this.id);
+          }
         } else {
-          this.extensionObject.element.remove();
+          if (this.extensionObject) {
+            this.extensionObject.element.remove();
+            delete this.extensionObject;
+          }
         }
       }
     }
@@ -297,6 +309,7 @@ define(() => {
       if (value === this.flatten) return;
       this.element.classList[value ? 'add' : 'remove']('flatten');
       this.$subList.forEach(item => { item.flatten = value; });
+      this.update();
     }
 
     toggle(event) {

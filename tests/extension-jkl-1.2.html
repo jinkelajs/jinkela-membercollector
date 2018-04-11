@@ -39,7 +39,7 @@ class Extension extends Jinkela {
     `;
   }
   get value() { return this.element.value; }
-  set value(value) { this.element.value = value; }
+  set value(value = '') { this.element.value = value; }
   get disabled() { return this.element.disabled; }
   set disabled(value) { this.element.disabled = value; }
 }
