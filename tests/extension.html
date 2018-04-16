@@ -92,6 +92,9 @@ class Extension extends Jinkela {
   firstMemberInput.dispatchEvent(new Event('change', { bubbles: true }));
   Tester.assert(JSON.stringify(mc.value) === '{"1":"hehe"}', 'length of mc.value must be {"1":"hehe"}');
 
+  mc.value = { 1: 'haha' }; // update value from mc.value
+  Tester.assert(firstMemberInput.value === 'haha', 'firstMemberInput.value must be "haha"');
+
   mc.value = []; // clear value
   Tester.assert(!firstMemberCheckbox.classList.contains('checked'), 'first member must be not checked');
 

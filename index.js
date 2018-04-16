@@ -188,6 +188,7 @@ define(() => {
           let myEvent = new CustomEvent('update', { bubbles: true, detail });
           this.element.dispatchEvent(myEvent);
         });
+        value.to(this);
       }
       Object.defineProperty(this, 'extensionObject', { configurable: true, value });
       return value;
@@ -198,19 +199,17 @@ define(() => {
     }
 
     update(value) {
+      if (!value) return;
       let checked = !!this.checked;
-      if (value) this.checked = value.has(this.id);
-      if (this.checked !== checked) {
-        if (this.checked) {
-          if (this.extensionObject) {
-            this.extensionObject.to(this);
-            if (value) this.extensionObject.value = value.get(this.id);
-          }
-        } else {
-          if (this.extensionObject) {
-            this.extensionObject.element.remove();
-            delete this.extensionObject;
-          }
+      this.checked = value.has(this.id);
+      if (this.checked) {
+        let extensionValue = value.get(this.id);
+        //  TODO: The "!==" operator is unsafe in object cases
+        if (this.extensionObject && this.extensionObject.value !== extensionValue) this.extensionObject.value = extensionValue;
+      } else {
+        if (this.hasOwnProperty('extensionObject')) {
+          this.extensionObject && this.extensionObject.element.remove();
+          delete this.extensionObject;
         }
       }
     }
