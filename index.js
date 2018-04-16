@@ -181,7 +181,7 @@ define(() => {
       let { extension: Extension, disabled } = this;
       let value;
       if (typeof Extension === 'function') {
-        value = new Extension({ disabled });
+        value = new Extension({ disabled, member: this });
         value.element.addEventListener('change', () => {
           if (!this.checked) return;
           let detail = this.value;
