@@ -699,8 +699,8 @@ define(() => {
         <div>
           <div class="controls">
             <jkl-input ref="input" placeholder="{placeholder}"></jkl-input>
-            <jkl-control ref="checkedOnlyControl" key="checkedonly">{checkedOnlyText}</jkl-control>
-            <jkl-control key="flatten">{flattenText}</jkl-control>
+            <jkl-control ref="checkedOnlyControl" key="checkedonly" if="{checkedOnlyText}">{checkedOnlyText}</jkl-control>
+            <jkl-control key="flatten" if="{flattenText}">{flattenText}</jkl-control>
           </div>
           <jkl-tree ref="tree" data="{data}" extension="{extension}" disabled="{disabled}"></jkl-tree>
         </div>
