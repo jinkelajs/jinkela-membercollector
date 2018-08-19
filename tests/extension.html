@@ -1,7 +1,7 @@
 <meta charset="utf-8" />
-<script src="https://cdn.jsdelivr.net/npm/jinkela@1.3.3/umd.js"></script>
+<script src="jinkela.js"></script>
 <script src="/tester.js"></script>
-<script src="/umd.js"></script>
+<script src="/MemberCollector.js"></script>
 <body>
 <script>
 var data = [
@@ -52,7 +52,7 @@ class Extension extends Jinkela {
   let mc = new MemberCollector({ data, extension: Extension }).to(document.body);
   Tester.assert(JSON.stringify(mc.value) === '{}', 'mc.value must be an empty object');
 
-  let firstDepartment = mc.element.querySelector('[jinkela-class^=Option]');
+  let firstDepartment = mc.element.querySelector('[jinkela-class^=Option],[jinkela-class="8"]');
   Tester.assert(firstDepartment, 'first department must exist');
 
   let firstDepartmentList = firstDepartment.nextElementSibling;
@@ -62,7 +62,7 @@ class Extension extends Jinkela {
   firstDepartment.click(); // unfold
   Tester.assert(firstDepartmentList.children.length > 0, 'children must be not empty now');
 
-  let firstNestedDepartment = firstDepartmentList.querySelector('[jinkela-class^=Option]');
+  let firstNestedDepartment = firstDepartmentList.querySelector('[jinkela-class^=Option],[jinkela-class="8"]');
   Tester.assert(firstNestedDepartment, 'first nested department must exist');
 
   let firstNestedDepartmentList = firstNestedDepartment.nextElementSibling;
@@ -77,10 +77,10 @@ class Extension extends Jinkela {
    * Select a Member
   **/
 
-  let firstMember = mc.element.querySelector('[jinkela-class^=Member]');
+  let firstMember = mc.element.querySelector('[jinkela-class^=Member],[jinkela-class="9"]');
   Tester.assert(firstMember, 'first member must exist');
 
-  let firstMemberCheckbox = firstMember.querySelector('[jinkela-class^=Checkbox]');
+  let firstMemberCheckbox = firstMember.querySelector('[jinkela-class^=Checkbox],[jinkela-class="4"]');
   Tester.assert(!firstMemberCheckbox.classList.contains('checked'), 'first member must be not checked yet');
 
   firstMember.firstElementChild.click(); // select
@@ -103,7 +103,7 @@ class Extension extends Jinkela {
    * Select a Department
   **/
 
-  let firstDepartmentCheckbox = firstDepartment.querySelector('[jinkela-class^=Checkbox]');
+  let firstDepartmentCheckbox = firstDepartment.querySelector('[jinkela-class^=Checkbox],[jinkela-class="4"]');
   Tester.assert(firstDepartmentCheckbox, 'first department checkbox must exist');
 
   firstDepartmentCheckbox.click(); // select whole department
