@@ -1,1 +1,1 @@
-## [Example](https://jinkelajs.github.io/jinkela-membercollector/example/index.html)
+## [Example](https://jinkelajs.github.io/jinkela-membercollector/example/)

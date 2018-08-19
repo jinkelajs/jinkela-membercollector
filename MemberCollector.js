@@ -1,4 +1,6 @@
-define(() => {
+var MemberCollector; // eslint-disable-line no-unused-vars
+
+{
 
   class Checkbox extends Jinkela {
     set disabled(value) { this.element.classList[value ? 'add' : 'remove']('disabled'); }
@@ -200,12 +202,13 @@ define(() => {
 
     update(value) {
       if (!value) return;
-      let checked = !!this.checked;
       this.checked = value.has(this.id);
       if (this.checked) {
         let extensionValue = value.get(this.id);
         //  TODO: The "!==" operator is unsafe in object cases
-        if (this.extensionObject && this.extensionObject.value !== extensionValue) this.extensionObject.value = extensionValue;
+        if (this.extensionObject && this.extensionObject.value !== extensionValue) {
+          this.extensionObject.value = extensionValue;
+        }
       } else {
         if (this.hasOwnProperty('extensionObject')) {
           this.extensionObject && this.extensionObject.element.remove();
@@ -569,7 +572,7 @@ define(() => {
     }
   }
 
-  class MemberCollector extends Jinkela {
+  MemberCollector = class MemberCollector extends Jinkela {
     // Compatible with Jinkela 1.2.*
     beforeParse({ data, disabled, extension }) {
       this.data = data;
@@ -699,7 +702,8 @@ define(() => {
         <div>
           <div class="controls">
             <jkl-input ref="input" placeholder="{placeholder}"></jkl-input>
-            <jkl-control ref="checkedOnlyControl" key="checkedonly" if="{checkedOnlyText}">{checkedOnlyText}</jkl-control>
+            <jkl-control ref="checkedOnlyControl" key="checkedonly"
+                         if="{checkedOnlyText}">{checkedOnlyText}</jkl-control>
             <jkl-control key="flatten" if="{flattenText}">{flattenText}</jkl-control>
           </div>
           <jkl-tree ref="tree" data="{data}" extension="{extension}" disabled="{disabled}"></jkl-tree>
@@ -740,8 +744,6 @@ define(() => {
         }
       `;
     }
-  }
+  };
 
-  return MemberCollector;
-
-});
+}
